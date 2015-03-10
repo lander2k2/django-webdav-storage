@@ -19,6 +19,7 @@ class WebDavStorage(StorageBase):
         self.requests = self.get_requests_instance(**kwargs)
         self.webdav_url = self.set_webdav_url(**kwargs)
         self.public_url = self.set_public_url(**kwargs)
+        self.trusted_cert = self.set_trusted_cert(**kwargs)
 
         if not self.webdav_url:
             raise NotImplementedError('Please define webdav url')
@@ -31,10 +32,14 @@ class WebDavStorage(StorageBase):
     def set_public_url(self, **kwargs):
         return kwargs.get('public_url') or setting('WEBDAV_PUBLIC_URL')
 
+    def set_trusted_cert(self, **kwargs):
+        return kwargs.get('trusted_cert') or setting('WEBDAV_TRUSTED_CERT')
+
     def get_requests_instance(self, **kwargs):
         return requests.Session()
 
     def webdav(self, method, name, *args, **kwargs):
+        kwargs['verify'] = self.trusted_cert
         url = self.get_webdav_url(name)
         method = method.lower()
         response = getattr(self.requests, method)(url, *args, **kwargs)
