@@ -56,6 +56,12 @@ class WebDavStorage(StorageBase):
         return ContentFile(self.webdav('GET', name).content)
 
     def _save(self, name, content):
+        path_list = name.split('/')
+        coll_path = self.webdav_url
+        for directory in path_list[:-1]:
+            self.requests.request('MKCOL', '{0}/{1}'.format(coll_path,
+                                                            directory))
+            coll_path += '/{}'.format(directory)
         self.webdav('PUT', name, data=content)
         return name
 
